@@ -12,10 +12,10 @@ import { Mongo } from 'meteor/mongo'
  *
  * @type {Mongo.Collection<AssociationProjectLanguage>} The Mongo collection of associations documents
  */
-const AssociationProjectLanguageCollection = new Mongo.Collection("a_project_language")
-AssociationProjectLanguageCollection.allow({
+const AssociationsProjectLanguageCollection = new Mongo.Collection("a_project_language")
+AssociationsProjectLanguageCollection.allow({
     insert: () => true,
     remove: () => true,
     update: () => true,
 })
-export default AssociationProjectLanguageCollection
+export default AssociationsProjectLanguageCollection

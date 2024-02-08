@@ -12,10 +12,10 @@ import { Mongo } from 'meteor/mongo'
  *
  * @type {Mongo.Collection<AssociationProjectFramework>} The Mongo collection of associations documents
  */
-const AssociationProjectFrameworkCollection = new Mongo.Collection("a_project_framework")
-AssociationProjectFrameworkCollection.allow({
+const AssociationsProjectFrameworkCollection = new Mongo.Collection("a_project_framework")
+AssociationsProjectFrameworkCollection.allow({
     insert: () => true,
     remove: () => true,
     update: () => true,
 })
-export default AssociationProjectFrameworkCollection
+export default AssociationsProjectFrameworkCollection

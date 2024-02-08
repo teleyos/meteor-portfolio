@@ -14,14 +14,14 @@ import { Mongo } from "meteor/mongo"
 
 /**
  * @typedef {Object} PopulateTablesArgs
- * @property {Mongo.Collection<Project>} ProjectCollection - the meteor mongo db collection for project documents
+ * @property {Mongo.Collection<Project>} ProjectsCollection - the meteor mongo db collection for project documents
  * @property {Mongo.Collection<Status>} StatusCollection - the meteor mongo db collection for status documents
- * @property {Mongo.Collection<Framework>} FrameworkCollection - the meteor mongo db collection for framework documents
- * @property {Mongo.Collection<Language>} LanguageCollection - the meteor mongo db collection for language documents
+ * @property {Mongo.Collection<Framework>} FrameworksCollection - the meteor mongo db collection for framework documents
+ * @property {Mongo.Collection<Language>} LanguagesCollection - the meteor mongo db collection for language documents
  *
- * @property {Mongo.Collection<AssociationProjectLanguage>} AssociationProjectLanguageCollection - the meteor mongo db collection for associations between projects and languages
- * @property {Mongo.Collection<AssociationFrameworkLanguage>} AssociationFrameworkLanguageCollection - the meteor mongo db collection for associations between frameworks and languages
- * @property {Mongo.Collection<AssociationProjectFramework>} AssociationProjectFrameworkCollection - the meteor mongo db collection for associations between projects and frameworks
+ * @property {Mongo.Collection<AssociationProjectLanguage>} AssociationsProjectLanguageCollection - the meteor mongo db collection for associations between projects and languages
+ * @property {Mongo.Collection<AssociationFrameworkLanguage>} AssociationsFrameworkLanguageCollection - the meteor mongo db collection for associations between frameworks and languages
+ * @property {Mongo.Collection<AssociationProjectFramework>} AssociationsProjectFrameworkCollection - the meteor mongo db collection for associations between projects and frameworks
  */
 
 /**
@@ -30,25 +30,25 @@ import { Mongo } from "meteor/mongo"
  */
 export const populateTables = async ({
     StatusCollection,
-    ProjectCollection,
-    FrameworkCollection,
-    LanguageCollection,
-    AssociationProjectLanguageCollection,
-    AssociationFrameworkLanguageCollection,
-    AssociationProjectFrameworkCollection,
+    ProjectsCollection,
+    FrameworksCollection,
+    LanguagesCollection,
+    AssociationsProjectLanguageCollection,
+    AssociationsFrameworkLanguageCollection,
+    AssociationsProjectFrameworkCollection,
 }) => {
     // need these tables to be full before writing the example associations
     await Promise.all([
         populateStatus(StatusCollection),
-        populateProjects(ProjectCollection),
-        populateFrameworks(FrameworkCollection),
-        populateLanguages(LanguageCollection)
+        populateProjects(ProjectsCollection),
+        populateFrameworks(FrameworksCollection),
+        populateLanguages(LanguagesCollection)
     ])
 
     await Promise.all([
-        populateAssociationProjectLanguage(AssociationProjectLanguageCollection, ProjectCollection, LanguageCollection),
-        populateAssociationFrameworkLanguage(AssociationFrameworkLanguageCollection, FrameworkCollection, LanguageCollection),
-        populateAssociationProjectFramework(AssociationProjectFrameworkCollection, ProjectCollection, FrameworkCollection)
+        populateAssociationProjectLanguage(AssociationsProjectLanguageCollection, ProjectsCollection, LanguagesCollection),
+        populateAssociationFrameworkLanguage(AssociationsFrameworkLanguageCollection, FrameworksCollection, LanguagesCollection),
+        populateAssociationProjectFramework(AssociationsProjectFrameworkCollection, ProjectsCollection, FrameworksCollection)
     ])
 
 }
@@ -69,22 +69,22 @@ const populateStatus = async (StatusCollection) => {
 }
 
 /**
- * @param {Mongo.Collection<Project>} ProjectCollection
+ * @param {Mongo.Collection<Project>} ProjectsCollection
  */
-const populateProjects = async (ProjectCollection) => {
-    if (await ProjectCollection.find().countAsync() !== 0) return;
+const populateProjects = async (ProjectsCollection) => {
+    if (await ProjectsCollection.find().countAsync() !== 0) return;
     for (let i = 0; i < 10; i++) {
         let project = generateProject().next().value
-        if (project) await ProjectCollection.insertAsync(project)
+        if (project) await ProjectsCollection.insertAsync(project)
     }
 }
 
 /**
- * @param {Mongo.Collection<Framework>} FrameworkCollection
+ * @param {Mongo.Collection<Framework>} FrameworksCollection
  */
-const populateFrameworks = async (FrameworkCollection) => {
+const populateFrameworks = async (FrameworksCollection) => {
 
-    if (await FrameworkCollection.find().countAsync() !== 0) return;
+    if (await FrameworksCollection.find().countAsync() !== 0) return;
     /**
      * @type {Array<Framework>}
      */
@@ -104,14 +104,14 @@ const populateFrameworks = async (FrameworkCollection) => {
         }
     ]
 
-    frameworksFixtures.forEach((framework) => FrameworkCollection.insertAsync(framework))
+    frameworksFixtures.forEach((framework) => FrameworksCollection.insertAsync(framework))
 }
 
 /**
- * @param {Mongo.Collection<Language>} LanguageCollection
+ * @param {Mongo.Collection<Language>} LanguagesCollection
  */
-const populateLanguages = async (LanguageCollection) => {
-    if (await LanguageCollection.find().countAsync() !== 0) return;
+const populateLanguages = async (LanguagesCollection) => {
+    if (await LanguagesCollection.find().countAsync() !== 0) return;
     /**
      * @type {Array<Language>}
      */
@@ -133,21 +133,21 @@ const populateLanguages = async (LanguageCollection) => {
             proficiency: 7,
         }
     ]
-    languageFixtures.forEach((language) => LanguageCollection.insertAsync(language))
+    languageFixtures.forEach((language) => LanguagesCollection.insertAsync(language))
 }
 
 /**
  * Populates a_project_language
- * @param {Mongo.Collection<AssociationProjectLanguage>} AssociationProjectLanguageCollection
- * @param {Mongo.Collection<Project>} ProjectCollection
- * @param {Mongo.Collection<Language>} LanguageCollection
+ * @param {Mongo.Collection<AssociationProjectLanguage>} AssociationsProjectLanguageCollection
+ * @param {Mongo.Collection<Project>} ProjectsCollection
+ * @param {Mongo.Collection<Language>} LanguagesCollection
  */
-const populateAssociationProjectLanguage = async (AssociationProjectLanguageCollection, ProjectCollection, LanguageCollection) => {
-    if (await AssociationProjectLanguageCollection.find().countAsync() !== 0) return;
-    const languageIds = LanguageCollection.find().map(l => l._id)
+const populateAssociationProjectLanguage = async (AssociationsProjectLanguageCollection, ProjectsCollection, LanguagesCollection) => {
+    if (await AssociationsProjectLanguageCollection.find().countAsync() !== 0) return;
+    const languageIds = LanguagesCollection.find().map(l => l._id)
     const randIndex = () => Math.floor(Math.random() * languageIds.length)
-    ProjectCollection.find().map(p => {
-        AssociationProjectLanguageCollection.insertAsync({
+    ProjectsCollection.find().map(p => {
+        AssociationsProjectLanguageCollection.insertAsync({
             project_id: p._id,
             language_id: languageIds[randIndex()]
         })
@@ -156,16 +156,16 @@ const populateAssociationProjectLanguage = async (AssociationProjectLanguageColl
 
 /**
  * Populates a_framework_language
- * @param {Mongo.Collection<AssociationFrameworkLanguage>} AssociationFrameworkLanguageCollection
- * @param {Mongo.Collection<Framework>} FrameworkCollection
- * @param {Mongo.Collection<Language>} LanguageCollection
+ * @param {Mongo.Collection<AssociationFrameworkLanguage>} AssociationsFrameworkLanguageCollection
+ * @param {Mongo.Collection<Framework>} FrameworksCollection
+ * @param {Mongo.Collection<Language>} LanguagesCollection
  */
-const populateAssociationFrameworkLanguage = async (AssociationFrameworkLanguageCollection, FrameworkCollection, LanguageCollection) => {
-    if (await AssociationFrameworkLanguageCollection.find().countAsync() !== 0) return;
-    const languageIds = LanguageCollection.find().map(l => l._id)
+const populateAssociationFrameworkLanguage = async (AssociationsFrameworkLanguageCollection, FrameworksCollection, LanguagesCollection) => {
+    if (await AssociationsFrameworkLanguageCollection.find().countAsync() !== 0) return;
+    const languageIds = LanguagesCollection.find().map(l => l._id)
     const randIndex = () => Math.floor(Math.random() * languageIds.length)
-    FrameworkCollection.find().map(f => {
-        AssociationFrameworkLanguageCollection.insertAsync({
+    FrameworksCollection.find().map(f => {
+        AssociationsFrameworkLanguageCollection.insertAsync({
             framework_id: f._id,
             language_id: languageIds[randIndex()]
         })
@@ -174,16 +174,16 @@ const populateAssociationFrameworkLanguage = async (AssociationFrameworkLanguage
 
 /**
  * Populates a_project_framework
- * @param {Mongo.Collection<AssociationProjectFramework>} AssociationProjectFrameworkCollection
- * @param {Mongo.Collection<Project>} ProjectCollection
- * @param {Mongo.Collection<Framework>} FrameworkCollection
+ * @param {Mongo.Collection<AssociationProjectFramework>} AssociationsProjectFrameworkCollection
+ * @param {Mongo.Collection<Project>} ProjectsCollection
+ * @param {Mongo.Collection<Framework>} FrameworksCollection
  */
-const populateAssociationProjectFramework = async (AssociationProjectFrameworkCollection, ProjectCollection, FrameworkCollection) => {
-    if (await AssociationProjectFrameworkCollection.find().countAsync() !== 0) return;
-    const frameworkIds = FrameworkCollection.find().map(f => f._id)
+const populateAssociationProjectFramework = async (AssociationsProjectFrameworkCollection, ProjectsCollection, FrameworksCollection) => {
+    if (await AssociationsProjectFrameworkCollection.find().countAsync() !== 0) return;
+    const frameworkIds = FrameworksCollection.find().map(f => f._id)
     const randIndex = () => Math.floor(Math.random() * frameworkIds.length)
-    ProjectCollection.find().map(p => {
-        AssociationProjectFrameworkCollection.insertAsync({
+    ProjectsCollection.find().map(p => {
+        AssociationsProjectFrameworkCollection.insertAsync({
             project_id: p._id,
             framework_id: frameworkIds[randIndex()]
         })
